@@ -18,18 +18,18 @@ class Lexer {
 
     private final Map<String, TokenType> keywords = Maps.newHashMap();
 
-    public Lexer(@NonNull String input) {
+    Lexer(@NonNull String input) {
         this.input = input;
         readNextCharacter();
         initializeKeywordMap();
     }
 
-    private void initializeKeywordMap(){
+    private void initializeKeywordMap() {
         keywords.put("let", LET);
         keywords.put("fn", FUNCTION);
     }
 
-    public Token nextToken() {
+    Token nextToken() {
         Token token;
         eatWhitespace();
         switch (currentChar) {
@@ -61,8 +61,8 @@ class Lexer {
                 token = new Token(EOF, "");
                 break;
             default: {
-                token = isCharacterIdentifier(currentChar) ? readIdentifier() : new Token(ILLEGAL, "");
-                break;
+                return identifyToken(); // trick place here... ignores next readNextCharacter() below and
+                                        // while it implicitly readsNext in subsequent calls to identify token
             }
         }
         readNextCharacter();
@@ -70,9 +70,22 @@ class Lexer {
     }
 
     private void eatWhitespace() {
-        while(Character.isWhitespace(currentChar)){
+        while (Character.isWhitespace(currentChar)) {
             readNextCharacter();
         }
+    }
+
+    private Token identifyToken() {
+        if (isCharacterIdentifier(currentChar)){
+            return readIdentifier();
+        } else if (isDigit(currentChar)){
+            return readIntToken();
+        }
+        return new Token(ILLEGAL, "");
+    }
+
+    private boolean isDigit(char currentChar) {
+        return Character.isDigit(currentChar);
     }
 
     private boolean isCharacterIdentifier(char currentChar) {
@@ -80,13 +93,23 @@ class Lexer {
     }
 
     private Token readIdentifier() {
+//        IdentifierExtractor identifierExtractor = new IdentifierExtractor();
         int identifierStart = currentInputPosition;
-        while(isCharacterIdentifier(currentChar)) {
+        while (isCharacterIdentifier(currentChar)) {
             readNextCharacter();
         }
         String identifier = input.substring(identifierStart, currentInputPosition);
         TokenType tokenType = lookupTokenType(identifier);
         return new Token(tokenType, identifier);
+    }
+
+    private Token readIntToken() {
+        int identifierStart = currentInputPosition;
+        while (isDigit(currentChar)) {
+            readNextCharacter();
+        }
+        String identifier = input.substring(identifierStart, currentInputPosition);
+        return new Token(INT, identifier);
     }
 
     private TokenType lookupTokenType(String identifier) {
