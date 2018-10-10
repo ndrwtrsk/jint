@@ -1,7 +1,10 @@
 package nd.rw.jint.token;
 
+import com.google.common.collect.Maps;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+
+import java.util.Map;
 
 @Getter
 @RequiredArgsConstructor
@@ -34,5 +37,16 @@ public enum TokenType {
 
 
     private final String value;
+
+    private static Map<String, TokenType> keywords = Maps.newHashMap();
+
+    static{
+        keywords.put("let", LET);
+        keywords.put("fn", FUNCTION);
+    }
+
+    public static TokenType lookupTokenType(String possibleToken) {
+        return keywords.getOrDefault(possibleToken, IDENT);
+    }
 
 }

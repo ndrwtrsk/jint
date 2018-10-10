@@ -1,32 +1,32 @@
 package nd.rw.jint.lexer;
 
-import com.google.common.collect.Maps;
 import lombok.NonNull;
 import nd.rw.jint.token.Token;
-import nd.rw.jint.token.TokenType;
 
-import java.util.Map;
+import static nd.rw.jint.token.TokenType.ASSIGN;
+import static nd.rw.jint.token.TokenType.COMMA;
+import static nd.rw.jint.token.TokenType.EOF;
+import static nd.rw.jint.token.TokenType.ILLEGAL;
+import static nd.rw.jint.token.TokenType.INT;
+import static nd.rw.jint.token.TokenType.LBRACE;
+import static nd.rw.jint.token.TokenType.LPAREN;
+import static nd.rw.jint.token.TokenType.PLUS;
+import static nd.rw.jint.token.TokenType.RBRACE;
+import static nd.rw.jint.token.TokenType.RPAREN;
+import static nd.rw.jint.token.TokenType.SEMICOLON;
 
-import static nd.rw.jint.token.TokenType.*;
-
-class Lexer {
+class Lexer implements CharacterIterator{
 
     private final String input;
     private int currentInputPosition;
     private int currentReadingPosition;
     private char currentChar;
 
-    private final Map<String, TokenType> keywords = Maps.newHashMap();
+    private final IdentifierExtractor identifierExtractor = new IdentifierExtractor();
 
     Lexer(@NonNull String input) {
         this.input = input;
         readNextCharacter();
-        initializeKeywordMap();
-    }
-
-    private void initializeKeywordMap() {
-        keywords.put("let", LET);
-        keywords.put("fn", FUNCTION);
     }
 
     Token nextToken() {
@@ -76,8 +76,8 @@ class Lexer {
     }
 
     private Token identifyToken() {
-        if (isCharacterIdentifier(currentChar)){
-            return readIdentifier();
+        if (identifierExtractor.isApplicable(currentChar)){
+            return identifierExtractor.extract(this, currentInputPosition, input.charAt(currentInputPosition));
         } else if (isDigit(currentChar)){
             return readIntToken();
         }
@@ -86,21 +86,6 @@ class Lexer {
 
     private boolean isDigit(char currentChar) {
         return Character.isDigit(currentChar);
-    }
-
-    private boolean isCharacterIdentifier(char currentChar) {
-        return Character.isLetter(currentChar) || currentChar == '_';
-    }
-
-    private Token readIdentifier() {
-//        IdentifierExtractor identifierExtractor = new IdentifierExtractor();
-        int identifierStart = currentInputPosition;
-        while (isCharacterIdentifier(currentChar)) {
-            readNextCharacter();
-        }
-        String identifier = input.substring(identifierStart, currentInputPosition);
-        TokenType tokenType = lookupTokenType(identifier);
-        return new Token(tokenType, identifier);
     }
 
     private Token readIntToken() {
@@ -112,11 +97,8 @@ class Lexer {
         return new Token(INT, identifier);
     }
 
-    private TokenType lookupTokenType(String identifier) {
-        return keywords.getOrDefault(identifier, IDENT);
-    }
-
-    private void readNextCharacter() {
+    @Override
+    public CurrentCharacterAndPosition readNextCharacter() {
         if (currentReadingPosition >= input.length()) {
             currentChar = 0;
         } else {
@@ -124,6 +106,12 @@ class Lexer {
         }
         currentInputPosition = currentReadingPosition;
         currentReadingPosition++;
+        return CurrentCharacterAndPosition.of(currentChar, currentInputPosition);
+    }
+
+    @Override
+    public String extractLexicalInputSubstring(int beginIndexInclusive, int endIndexExclusive) {
+        return input.substring(beginIndexInclusive, endIndexExclusive);
     }
 
 }
