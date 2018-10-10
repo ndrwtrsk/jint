@@ -37,7 +37,7 @@ public class LexerTest {
                         token(RBRACE, "}"),
                         token(SEMICOLON, ";"),
                         token(COMMA, ","),
-                        token(EOF, "")
+                        token(EOF, "EOF")
                 );
     }
 
@@ -97,12 +97,12 @@ public class LexerTest {
                         token(IDENT, "ten"),
                         token(RPAREN, ")"),
                         token(SEMICOLON, ";"),
-                        token(EOF, "")
+                        token(EOF, "EOF")
                 );
     }
 
     private Token token(TokenType tokenType, String literal) {
-        return new Token(tokenType, literal);
+        return Token.of(tokenType, literal);
     }
 
 }

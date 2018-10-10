@@ -2,20 +2,11 @@ package nd.rw.jint.lexer;
 
 import lombok.NonNull;
 import nd.rw.jint.token.Token;
+import nd.rw.jint.token.TokenType;
 
-import static nd.rw.jint.token.TokenType.ASSIGN;
-import static nd.rw.jint.token.TokenType.COMMA;
-import static nd.rw.jint.token.TokenType.EOF;
 import static nd.rw.jint.token.TokenType.ILLEGAL;
-import static nd.rw.jint.token.TokenType.INT;
-import static nd.rw.jint.token.TokenType.LBRACE;
-import static nd.rw.jint.token.TokenType.LPAREN;
-import static nd.rw.jint.token.TokenType.PLUS;
-import static nd.rw.jint.token.TokenType.RBRACE;
-import static nd.rw.jint.token.TokenType.RPAREN;
-import static nd.rw.jint.token.TokenType.SEMICOLON;
 
-class Lexer implements CharacterIterator{
+class Lexer implements CharacterIterator {
 
     private final String input;
     private int currentInputPosition;
@@ -23,6 +14,7 @@ class Lexer implements CharacterIterator{
     private char currentChar;
 
     private final IdentifierExtractor identifierExtractor = new IdentifierExtractor();
+    private final DigitsExtractor digitsExtractor = new DigitsExtractor();
 
     Lexer(@NonNull String input) {
         this.input = input;
@@ -30,43 +22,16 @@ class Lexer implements CharacterIterator{
     }
 
     Token nextToken() {
-        Token token;
         eatWhitespace();
-        switch (currentChar) {
-            case '+':
-                token = new Token(PLUS, "+");
-                break;
-            case '=':
-                token = new Token(ASSIGN, "=");
-                break;
-            case '(':
-                token = new Token(LPAREN, "(");
-                break;
-            case ')':
-                token = new Token(RPAREN, ")");
-                break;
-            case '{':
-                token = new Token(LBRACE, "{");
-                break;
-            case '}':
-                token = new Token(RBRACE, "}");
-                break;
-            case ';':
-                token = new Token(SEMICOLON, ";");
-                break;
-            case ',':
-                token = new Token(COMMA, ",");
-                break;
-            case 0:
-                token = new Token(EOF, "");
-                break;
-            default: {
-                return identifyToken(); // trick place here... ignores next readNextCharacter() below and
-                                        // while it implicitly readsNext in subsequent calls to identify token
-            }
+        if (TokenType.isValidSimpleTokenType(currentChar)) {
+            TokenType type = TokenType.findTokenType(currentChar);
+            String literal = currentChar != 0 ? Character.toString(currentChar) : "EOF"; // todo dirty!!!
+            readNextCharacter();
+            return Token.of(type, literal);
+        } else {
+            return identifyToken(); // tricky place here... ignores next readNextCharacter() below and
+            // while it implicitly readsNext in subsequent calls to identify token
         }
-        readNextCharacter();
-        return token;
     }
 
     private void eatWhitespace() {
@@ -76,25 +41,12 @@ class Lexer implements CharacterIterator{
     }
 
     private Token identifyToken() {
-        if (identifierExtractor.isApplicable(currentChar)){
-            return identifierExtractor.extract(this, currentInputPosition, input.charAt(currentInputPosition));
-        } else if (isDigit(currentChar)){
-            return readIntToken();
+        if (identifierExtractor.isApplicable(currentChar)) {
+            return identifierExtractor.extract(this, currentInputPosition, currentChar);
+        } else if (digitsExtractor.isApplicable(currentChar)) {
+            return digitsExtractor.extract(this, currentInputPosition, currentChar);
         }
-        return new Token(ILLEGAL, "");
-    }
-
-    private boolean isDigit(char currentChar) {
-        return Character.isDigit(currentChar);
-    }
-
-    private Token readIntToken() {
-        int identifierStart = currentInputPosition;
-        while (isDigit(currentChar)) {
-            readNextCharacter();
-        }
-        String identifier = input.substring(identifierStart, currentInputPosition);
-        return new Token(INT, identifier);
+        return Token.of(ILLEGAL, "");
     }
 
     @Override
