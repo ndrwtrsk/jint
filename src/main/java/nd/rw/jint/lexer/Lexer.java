@@ -4,6 +4,7 @@ import lombok.NonNull;
 import nd.rw.jint.token.Token;
 import nd.rw.jint.token.TokenType;
 
+import java.util.Iterator;
 import java.util.Optional;
 
 import static nd.rw.jint.token.TokenType.EOF;
@@ -11,7 +12,7 @@ import static nd.rw.jint.token.TokenType.EQ;
 import static nd.rw.jint.token.TokenType.ILLEGAL;
 import static nd.rw.jint.token.TokenType.NOT_EQ;
 
-class Lexer implements CharacterIterator {
+public class Lexer implements CharacterIterator, Iterator, Iterable<Token> {
 
     private final String input;
     private int currentInputPosition;
@@ -21,7 +22,7 @@ class Lexer implements CharacterIterator {
     private final IdentifierExtractor identifierExtractor = new IdentifierExtractor();
     private final NumbersExtractor numbersExtractor = new NumbersExtractor();
 
-    Lexer(@NonNull String input) {
+    public Lexer(@NonNull String input) {
         this.input = input;
         readNextCharacter();
     }
@@ -102,4 +103,18 @@ class Lexer implements CharacterIterator {
         return input.substring(beginIndexInclusive, endIndexExclusive);
     }
 
+    @Override
+    public Iterator iterator() {
+        return this;
+    }
+
+    @Override
+    public boolean hasNext() {
+        return currentChar != 0;
+    }
+
+    @Override
+    public Token next() {
+        return nextToken();
+    }
 }
