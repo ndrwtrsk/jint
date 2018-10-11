@@ -13,6 +13,7 @@ import static nd.rw.jint.token.TokenType.BANG;
 import static nd.rw.jint.token.TokenType.COMMA;
 import static nd.rw.jint.token.TokenType.ELSE;
 import static nd.rw.jint.token.TokenType.EOF;
+import static nd.rw.jint.token.TokenType.EQ;
 import static nd.rw.jint.token.TokenType.FALSE;
 import static nd.rw.jint.token.TokenType.FUNCTION;
 import static nd.rw.jint.token.TokenType.GT;
@@ -24,6 +25,7 @@ import static nd.rw.jint.token.TokenType.LET;
 import static nd.rw.jint.token.TokenType.LPAREN;
 import static nd.rw.jint.token.TokenType.LT;
 import static nd.rw.jint.token.TokenType.MINUS;
+import static nd.rw.jint.token.TokenType.NOT_EQ;
 import static nd.rw.jint.token.TokenType.PLUS;
 import static nd.rw.jint.token.TokenType.RBRACE;
 import static nd.rw.jint.token.TokenType.RETURN;
@@ -223,6 +225,37 @@ public class LexerTest {
                 token(EOF)
 
         );
+    }
+
+    @Test
+    public void testNextToken_EqNotEq() {
+        //  given
+        var input = "10 == 10; 9 != 10;";
+        var lexer = new Lexer(input);
+        List<Token> tokens = Lists.newArrayList();
+
+        //  when
+        for (int i = 0; i < input.length() + 1; i++) {
+            Token token = lexer.nextToken();
+            tokens.add(token);
+            if (token.getTokenType() == EOF) {
+                break;
+            }
+        }
+
+        //  then
+        assertThat(tokens).containsExactly(
+                token(INT, "10"),
+                token(EQ, "=="),
+                token(INT, "10"),
+                token(SEMICOLON),
+                token(INT, "9"),
+                token(NOT_EQ, "!="),
+                token(INT, "10"),
+                token(SEMICOLON),
+                token(EOF)
+        );
+
     }
 
     private Token token(TokenType tokenType, String literal) {

@@ -5,8 +5,9 @@ import nd.rw.jint.token.Token;
 abstract class TokenExtractor {
 
     final Token extract(CharacterIterator characterIterator,
-                           Integer startingIndexOfIdentifier,
-                           Character iteratedCharacterFromOutSide){
+                        Integer startingIndexOfIdentifier,
+                        Character iteratedCharacterFromOutSide) {
+
         Character iteratedCharacter = iteratedCharacterFromOutSide;
         int currentIndex = startingIndexOfIdentifier;
 

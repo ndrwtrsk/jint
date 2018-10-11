@@ -4,8 +4,12 @@ import lombok.NonNull;
 import nd.rw.jint.token.Token;
 import nd.rw.jint.token.TokenType;
 
+import java.util.Optional;
+
 import static nd.rw.jint.token.TokenType.EOF;
+import static nd.rw.jint.token.TokenType.EQ;
 import static nd.rw.jint.token.TokenType.ILLEGAL;
+import static nd.rw.jint.token.TokenType.NOT_EQ;
 
 class Lexer implements CharacterIterator {
 
@@ -27,10 +31,16 @@ class Lexer implements CharacterIterator {
         if (TokenType.isEOF(currentChar)) {
             return Token.of(EOF, EOF.getValue());
         } else if (TokenType.isValidSimpleTokenType(currentChar)) {
-            TokenType type = TokenType.findTokenType(currentChar);
-            String literal = Character.toString(currentChar);
-            readNextCharacter();
-            return Token.of(type, literal);
+            Optional<Token> possibleEqNotEqTokenType = checkForPossibleEqNotEqToken();
+            if (possibleEqNotEqTokenType.isPresent()) {
+                readNextCharacter();
+                return possibleEqNotEqTokenType.get();
+            } else {
+                TokenType type = TokenType.findTokenType(currentChar);
+                String literal = Character.toString(currentChar);
+                readNextCharacter();
+                return Token.of(type, literal);
+            }
         } else {
             return identifyToken();
         }
@@ -40,6 +50,23 @@ class Lexer implements CharacterIterator {
         while (Character.isWhitespace(currentChar)) {
             readNextCharacter();
         }
+    }
+
+    // TODO: 2018-10-11 create extractor for double char operators?
+    private Optional<Token> checkForPossibleEqNotEqToken() {
+        char peekedCharacter = peekNextCharacter();
+        if (currentChar == '=') {
+            if (peekedCharacter == '=') {
+                readNextCharacter();
+                return Optional.of(Token.of(EQ, "=="));
+            }
+        } else if (currentChar == '!') {
+            if (peekedCharacter == '=') {
+                readNextCharacter();
+                return Optional.of(Token.of(NOT_EQ, "!="));
+            }
+        }
+        return Optional.empty();
     }
 
     private Token identifyToken() {
@@ -61,6 +88,13 @@ class Lexer implements CharacterIterator {
         currentInputPosition = currentReadingPosition;
         currentReadingPosition++;
         return CurrentCharacterAndPosition.of(currentChar, currentInputPosition);
+    }
+
+    private Character peekNextCharacter() {
+        if (currentReadingPosition >= input.length())
+            return 0;
+        else
+            return input.charAt(currentReadingPosition);
     }
 
     @Override

@@ -29,6 +29,8 @@ public enum TokenType {
     BANG("!"),
     LT("<"),
     GT(">"),
+    EQ("=="),
+    NOT_EQ("!="),
 
     //  delimiters
     COMMA(","),
