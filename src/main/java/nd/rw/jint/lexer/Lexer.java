@@ -4,6 +4,7 @@ import lombok.NonNull;
 import nd.rw.jint.token.Token;
 import nd.rw.jint.token.TokenType;
 
+import static nd.rw.jint.token.TokenType.EOF;
 import static nd.rw.jint.token.TokenType.ILLEGAL;
 
 class Lexer implements CharacterIterator {
@@ -23,14 +24,15 @@ class Lexer implements CharacterIterator {
 
     Token nextToken() {
         eatWhitespace();
-        if (TokenType.isValidSimpleTokenType(currentChar)) {
+        if (TokenType.isEOF(currentChar)) {
+            return Token.of(EOF, EOF.getValue());
+        } else if (TokenType.isValidSimpleTokenType(currentChar)) {
             TokenType type = TokenType.findTokenType(currentChar);
-            String literal = currentChar != 0 ? Character.toString(currentChar) : "EOF"; // todo dirty!!!
+            String literal = Character.toString(currentChar);
             readNextCharacter();
             return Token.of(type, literal);
         } else {
-            return identifyToken(); // tricky place here... ignores next readNextCharacter() below and
-            // while it implicitly readsNext in subsequent calls to identify token
+            return identifyToken();
         }
     }
 
@@ -46,7 +48,7 @@ class Lexer implements CharacterIterator {
         } else if (numbersExtractor.isApplicable(currentChar)) {
             return numbersExtractor.extract(this, currentInputPosition, currentChar);
         }
-        return Token.of(ILLEGAL, "");
+        return Token.of(ILLEGAL, ILLEGAL.getValue());
     }
 
     @Override

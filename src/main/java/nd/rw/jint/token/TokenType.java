@@ -49,6 +49,10 @@ public enum TokenType {
         return keywords.getOrDefault(possibleToken, IDENT);
     }
 
+    public static boolean isEOF(char c) {
+        return c == 0;
+    }
+
     public static boolean isValidSimpleTokenType(final char c) {
         if (c == 0) {
             return true;
