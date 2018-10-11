@@ -5,10 +5,28 @@ import nd.rw.jint.token.TokenType;
 import org.assertj.core.util.Lists;
 import org.junit.Test;
 
-import static nd.rw.jint.token.TokenType.*;
-import static org.assertj.core.api.Assertions.*;
-
 import java.util.List;
+
+import static nd.rw.jint.token.TokenType.ASSIGN;
+import static nd.rw.jint.token.TokenType.ASTERISK;
+import static nd.rw.jint.token.TokenType.BANG;
+import static nd.rw.jint.token.TokenType.COMMA;
+import static nd.rw.jint.token.TokenType.EOF;
+import static nd.rw.jint.token.TokenType.FUNCTION;
+import static nd.rw.jint.token.TokenType.GT;
+import static nd.rw.jint.token.TokenType.IDENT;
+import static nd.rw.jint.token.TokenType.INT;
+import static nd.rw.jint.token.TokenType.LBRACE;
+import static nd.rw.jint.token.TokenType.LET;
+import static nd.rw.jint.token.TokenType.LPAREN;
+import static nd.rw.jint.token.TokenType.LT;
+import static nd.rw.jint.token.TokenType.MINUS;
+import static nd.rw.jint.token.TokenType.PLUS;
+import static nd.rw.jint.token.TokenType.RBRACE;
+import static nd.rw.jint.token.TokenType.RPAREN;
+import static nd.rw.jint.token.TokenType.SEMICOLON;
+import static nd.rw.jint.token.TokenType.SLASH;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class LexerTest {
 
@@ -99,6 +117,67 @@ public class LexerTest {
                         token(SEMICOLON, ";"),
                         token(EOF, "EOF")
                 );
+    }
+
+    @Test
+    public void testNextTokenExtendedExpressions() {
+        //  given
+        var input = "!-/*5;";
+        var lexer = new Lexer(input);
+        List<Token> tokens = Lists.newArrayList();
+
+        //  when
+        for (int i = 0; i < input.length() + 1; i++) {
+            Token token = lexer.nextToken();
+            tokens.add(token);
+            if (token.getTokenType() == EOF) {
+                break;
+            }
+        }
+
+        //  then
+        assertThat(tokens).containsExactly(
+                token(BANG, "!"),
+                token(MINUS, "-"),
+                token(SLASH, "/"),
+                token(ASTERISK, "*"),
+                token(INT, "5"),
+                token(SEMICOLON, ";"),
+                token(EOF, "EOF")
+
+        );
+    }
+
+    @Test
+    public void testNextTokenGT_LT() {
+        //  given
+        var input = "4 < 5; 5 > 4;";
+        var lexer = new Lexer(input);
+        List<Token> tokens = Lists.newArrayList();
+
+        //  when
+        for (int i = 0; i < input.length() + 1; i++) {
+            Token token = lexer.nextToken();
+            tokens.add(token);
+            if (token.getTokenType() == EOF) {
+                break;
+            }
+        }
+
+        //  then
+        assertThat(tokens).containsExactly(
+                token(INT, "4"),
+                token(LT, "<"),
+                token(INT, "5"),
+                token(SEMICOLON, ";"),
+                token(INT, "5"),
+                token(GT, ">"),
+                token(INT, "4"),
+                token(SEMICOLON, ";"),
+                token(EOF, "EOF")
+
+        );
+
     }
 
     private Token token(TokenType tokenType, String literal) {

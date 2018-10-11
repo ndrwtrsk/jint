@@ -23,6 +23,12 @@ public enum TokenType {
     //  operators
     ASSIGN("="),
     PLUS("+"),
+    MINUS("-"),
+    ASTERISK("*"),
+    SLASH("/"),
+    BANG("!"),
+    LT("<"),
+    GT(">"),
 
     //  delimiters
     COMMA(","),
