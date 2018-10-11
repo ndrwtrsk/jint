@@ -40,7 +40,12 @@ public enum TokenType {
 
     //  keywords
     FUNCTION("fn"),
-    LET("let");
+    LET("let"),
+    TRUE("TRUE"),
+    FALSE("FALSE"),
+    IF("IF"),
+    ELSE("ELSE"),
+    RETURN("RETURN");
 
     private final String value;
 
@@ -49,6 +54,11 @@ public enum TokenType {
     static {
         keywords.put("let", LET);
         keywords.put("fn", FUNCTION);
+        keywords.put("true", TRUE);
+        keywords.put("false", FALSE);
+        keywords.put("if", IF);
+        keywords.put("else", ELSE);
+        keywords.put("return", RETURN);
     }
 
     public static TokenType lookupTokenType(String possibleToken) {

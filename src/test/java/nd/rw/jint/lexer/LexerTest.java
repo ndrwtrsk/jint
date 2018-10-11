@@ -11,10 +11,13 @@ import static nd.rw.jint.token.TokenType.ASSIGN;
 import static nd.rw.jint.token.TokenType.ASTERISK;
 import static nd.rw.jint.token.TokenType.BANG;
 import static nd.rw.jint.token.TokenType.COMMA;
+import static nd.rw.jint.token.TokenType.ELSE;
 import static nd.rw.jint.token.TokenType.EOF;
+import static nd.rw.jint.token.TokenType.FALSE;
 import static nd.rw.jint.token.TokenType.FUNCTION;
 import static nd.rw.jint.token.TokenType.GT;
 import static nd.rw.jint.token.TokenType.IDENT;
+import static nd.rw.jint.token.TokenType.IF;
 import static nd.rw.jint.token.TokenType.INT;
 import static nd.rw.jint.token.TokenType.LBRACE;
 import static nd.rw.jint.token.TokenType.LET;
@@ -23,9 +26,11 @@ import static nd.rw.jint.token.TokenType.LT;
 import static nd.rw.jint.token.TokenType.MINUS;
 import static nd.rw.jint.token.TokenType.PLUS;
 import static nd.rw.jint.token.TokenType.RBRACE;
+import static nd.rw.jint.token.TokenType.RETURN;
 import static nd.rw.jint.token.TokenType.RPAREN;
 import static nd.rw.jint.token.TokenType.SEMICOLON;
 import static nd.rw.jint.token.TokenType.SLASH;
+import static nd.rw.jint.token.TokenType.TRUE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class LexerTest {
@@ -180,8 +185,52 @@ public class LexerTest {
 
     }
 
+    @Test
+    public void testNextToken_TrueFalseIfElseReturn() {
+        //  given
+        var input = "if (5 < 10) { return true; } else { return false; }";
+        var lexer = new Lexer(input);
+        List<Token> tokens = Lists.newArrayList();
+
+        //  when
+        for (int i = 0; i < input.length() + 1; i++) {
+            Token token = lexer.nextToken();
+            tokens.add(token);
+            if (token.getTokenType() == EOF) {
+                break;
+            }
+        }
+
+        //  then
+        assertThat(tokens).containsExactly(
+                token(IF, "if"),
+                token(LPAREN),
+                token(INT, "5"),
+                token(LT),
+                token(INT, "10"),
+                token(RPAREN),
+                token(LBRACE),
+                token(RETURN, "return"),
+                token(TRUE, "true"),
+                token(SEMICOLON),
+                token(RBRACE),
+                token(ELSE, "else"),
+                token(LBRACE),
+                token(RETURN, "return"),
+                token(FALSE, "false"),
+                token(SEMICOLON),
+                token(RBRACE),
+                token(EOF)
+
+        );
+    }
+
     private Token token(TokenType tokenType, String literal) {
         return Token.of(tokenType, literal);
+    }
+
+    private Token token(TokenType tokenType) {
+        return Token.of(tokenType, tokenType.getValue());
     }
 
 }
