@@ -14,7 +14,7 @@ class Lexer implements CharacterIterator {
     private char currentChar;
 
     private final IdentifierExtractor identifierExtractor = new IdentifierExtractor();
-    private final DigitsExtractor digitsExtractor = new DigitsExtractor();
+    private final NumbersExtractor numbersExtractor = new NumbersExtractor();
 
     Lexer(@NonNull String input) {
         this.input = input;
@@ -43,8 +43,8 @@ class Lexer implements CharacterIterator {
     private Token identifyToken() {
         if (identifierExtractor.isApplicable(currentChar)) {
             return identifierExtractor.extract(this, currentInputPosition, currentChar);
-        } else if (digitsExtractor.isApplicable(currentChar)) {
-            return digitsExtractor.extract(this, currentInputPosition, currentChar);
+        } else if (numbersExtractor.isApplicable(currentChar)) {
+            return numbersExtractor.extract(this, currentInputPosition, currentChar);
         }
         return Token.of(ILLEGAL, "");
     }
