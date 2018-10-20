@@ -1,7 +1,10 @@
 package nd.rw.jint.parser;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import lombok.Getter;
+import nd.rw.jint.ast.Expression;
+import nd.rw.jint.ast.ExpressionStatement;
 import nd.rw.jint.ast.Identifier;
 import nd.rw.jint.ast.LetStatement;
 import nd.rw.jint.ast.Program;
@@ -12,7 +15,9 @@ import nd.rw.jint.token.Token;
 import nd.rw.jint.token.TokenType;
 
 import java.util.List;
+import java.util.Map;
 
+import static nd.rw.jint.parser.PrecedenceOperator.LOWEST;
 import static nd.rw.jint.token.TokenType.ASSIGN;
 import static nd.rw.jint.token.TokenType.EOF;
 import static nd.rw.jint.token.TokenType.IDENT;
@@ -28,19 +33,23 @@ class Parser {
     @Getter
     private List<String> errors = Lists.newLinkedList();
 
-    public Parser(Lexer lexer) {
+    private Map<TokenType, InfixParseFunction> infixParseFunctions = Maps.newHashMap();
+    private Map<TokenType, PrefixParseFunction> prefixParseFunctions = Maps.newHashMap();
+
+    Parser(Lexer lexer) {
         this.lexer = lexer;
         nextToken();
         nextToken();
+        registerPrefixParseFunction(IDENT, () -> Identifier.of(currentToken, currentToken.getLiteral()));
     }
 
-    public void nextToken() {
+    private void nextToken() {
         currentToken = peekToken;
         peekToken = lexer.next();
     }
 
-    public Program parseProgram() {
-        Program program = new Program();
+    Program parseProgram() {
+        var program = new Program();
         var statements = program.getStatements();
 
         while (currentToken.getTokenType() != EOF) {
@@ -62,13 +71,38 @@ class Parser {
                 return parseReturnStatement();
             }
             default: {
-                return null;
+                return parseExpressionStatement();
             }
         }
     }
 
-    private Statement parseReturnStatement() {
-        ReturnStatement returnStatement = ReturnStatement.of(currentToken, null);
+    private ExpressionStatement parseExpressionStatement() {
+        var expressionStatement = new ExpressionStatement();
+        expressionStatement.setToken(currentToken);
+        var expression = parseExpression(LOWEST);
+        expressionStatement.setExpression(expression);
+
+        if (peekTokenIs(SEMICOLON)) {
+            nextToken();
+        }
+
+        return expressionStatement;
+    }
+
+    private Expression parseExpression(PrecedenceOperator precedenceOperator) {
+        var prefixParseFunction = prefixParseFunctions.get(currentToken.getTokenType());
+
+        if (prefixParseFunction == null) {
+            return null;
+        }
+
+        var leftExpression = prefixParseFunction.get();
+
+        return leftExpression;
+    }
+
+    private ReturnStatement parseReturnStatement() {
+        var returnStatement = ReturnStatement.of(currentToken, null);
         nextToken();
 
         while (currentTokenIsNot(SEMICOLON)) {
@@ -85,7 +119,7 @@ class Parser {
             return null;
         }
 
-        Identifier identifier = Identifier.of(currentToken, currentToken.getLiteral());
+        var identifier = Identifier.of(currentToken, currentToken.getLiteral());
         var statement = LetStatement.of(letToken, identifier, null);
 
         if (!expectPeekToken(ASSIGN)) {
@@ -122,8 +156,19 @@ class Parser {
     }
 
     private void peekError(TokenType tokenType) {
-        String message = String.format("Expected next token to be: %s, but got %s instead.", tokenType, peekToken.getTokenType());
+        var message = String.format("Expected next token to be: %s, but got %s instead.", tokenType, peekToken.getTokenType());
         errors.add(message);
     }
 
+    private void registerPrefixParseFunction(TokenType tokenType, PrefixParseFunction fn) {
+        prefixParseFunctions.put(tokenType, fn);
+    }
+
+    private void registerInfixParseFunction(TokenType tokenType, InfixParseFunction fn) {
+        infixParseFunctions.put(tokenType, fn);
+    }
+
+    boolean hasErrors() {
+        return !errors.isEmpty();
+    }
 }

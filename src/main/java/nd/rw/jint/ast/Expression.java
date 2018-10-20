@@ -1,6 +1,6 @@
 package nd.rw.jint.ast;
 
-interface Expression extends Node {
+public interface Expression extends Node {
 
     void expressionNode();
 
