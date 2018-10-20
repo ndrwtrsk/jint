@@ -1,7 +1,6 @@
 package nd.rw.jint.parser;
 
 import nd.rw.jint.ast.LetStatement;
-import nd.rw.jint.ast.Program;
 import nd.rw.jint.ast.Statement;
 import nd.rw.jint.lexer.Lexer;
 import org.junit.Test;
@@ -20,9 +19,10 @@ public class ParserTest {
         var parser = new Parser(lexer);
 
         //  when
-        Program program = parser.parseProgram();
+        var program = parser.parseProgram();
 
         //  then
+        assertThat(parser.getErrors()).isEmpty();
         assertThat(program).isNotNull();
         List<Statement> statements = program.getStatements();
         assertThat(statements).hasSize(1);
@@ -45,9 +45,10 @@ public class ParserTest {
         var parser = new Parser(lexer);
 
         //  when
-        Program program = parser.parseProgram();
+        var program = parser.parseProgram();
 
         //  then
+        assertThat(parser.getErrors()).isEmpty();
         assertThat(program).isNotNull();
         List<Statement> statements = program.getStatements();
         assertThat(statements).hasSize(3);
@@ -64,6 +65,22 @@ public class ParserTest {
         var letStatement = (LetStatement) statement;
         assertThat(letStatement.getName().getValue()).isEqualTo(value);
         assertThat(letStatement.getName().tokenLiteral()).isEqualTo(tokenLiteral);
+    }
+
+    @Test
+    public void testParsingYieldsErors() {
+        //  given
+        var letStatementInputWithError = "let x 5;";
+        var lexer = new Lexer(letStatementInputWithError);
+        var parser = new Parser(lexer);
+
+        //  when
+        var program = parser.parseProgram();
+
+        //  then
+        var errors = parser.getErrors();
+        assertThat(errors).hasSize(1);
+        System.out.println(errors);
     }
 
 }
