@@ -6,6 +6,7 @@ import lombok.Getter;
 import nd.rw.jint.ast.Expression;
 import nd.rw.jint.ast.ExpressionStatement;
 import nd.rw.jint.ast.Identifier;
+import nd.rw.jint.ast.IntegerLiteralExpression;
 import nd.rw.jint.ast.LetStatement;
 import nd.rw.jint.ast.Program;
 import nd.rw.jint.ast.ReturnStatement;
@@ -21,6 +22,7 @@ import static nd.rw.jint.parser.PrecedenceOperator.LOWEST;
 import static nd.rw.jint.token.TokenType.ASSIGN;
 import static nd.rw.jint.token.TokenType.EOF;
 import static nd.rw.jint.token.TokenType.IDENT;
+import static nd.rw.jint.token.TokenType.INT;
 import static nd.rw.jint.token.TokenType.SEMICOLON;
 
 class Parser {
@@ -41,6 +43,7 @@ class Parser {
         nextToken();
         nextToken();
         registerPrefixParseFunction(IDENT, () -> Identifier.of(currentToken, currentToken.getLiteral()));
+        registerPrefixParseFunction(INT, this::parseIntegerLiteralExpression);
     }
 
     private void nextToken() {
@@ -77,10 +80,9 @@ class Parser {
     }
 
     private ExpressionStatement parseExpressionStatement() {
-        var expressionStatement = new ExpressionStatement();
-        expressionStatement.setToken(currentToken);
+        var token = currentToken;
         var expression = parseExpression(LOWEST);
-        expressionStatement.setExpression(expression);
+        var expressionStatement = ExpressionStatement.of(token, expression);
 
         if (peekTokenIs(SEMICOLON)) {
             nextToken();
@@ -99,6 +101,17 @@ class Parser {
         var leftExpression = prefixParseFunction.get();
 
         return leftExpression;
+    }
+
+    private IntegerLiteralExpression parseIntegerLiteralExpression() {
+        long number = 0;
+        try {
+            number = Long.parseLong(currentToken.getLiteral());
+        } catch (NumberFormatException nfe) {
+            var message = String.format("Error parsing %s to number", currentToken.getLiteral());
+            errors.add(message);
+        }
+        return IntegerLiteralExpression.of(currentToken, number);
     }
 
     private ReturnStatement parseReturnStatement() {

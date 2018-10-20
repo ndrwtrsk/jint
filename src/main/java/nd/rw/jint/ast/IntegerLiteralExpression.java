@@ -5,16 +5,17 @@ import lombok.Getter;
 import nd.rw.jint.token.Token;
 
 @AllArgsConstructor(staticName = "of")
-public class ExpressionStatement implements Statement {
+public class IntegerLiteralExpression implements Expression {
 
     @Getter
     private Token token;
 
     @Getter
-    private Expression expression;
+    private long value;
+
 
     @Override
-    public void statementNode() {
+    public void expressionNode() {
 
     }
 
@@ -25,6 +26,6 @@ public class ExpressionStatement implements Statement {
 
     @Override
     public String toString() {
-        return expression != null ? expression.toString() : "";
+        return token.getLiteral();
     }
 }
