@@ -1,20 +1,14 @@
 package nd.rw.jint.ast;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import nd.rw.jint.token.Token;
 
-@AllArgsConstructor(staticName = "of")
-public class Identifier implements Expression {
+public class ExpressionStatement implements Statement {
 
     private Token token;
-
-    @Getter
-    private String value;
-
+    private Expression expression;
 
     @Override
-    public void expressionNode() {
+    public void statementNode() {
 
     }
 
@@ -25,6 +19,6 @@ public class Identifier implements Expression {
 
     @Override
     public String toString() {
-        return value;
+        return expression != null ? expression.toString() : "";
     }
 }

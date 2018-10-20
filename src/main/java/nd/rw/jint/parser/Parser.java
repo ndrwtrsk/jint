@@ -68,7 +68,7 @@ class Parser {
     }
 
     private Statement parseReturnStatement() {
-        ReturnStatement returnStatement = new ReturnStatement(currentToken, null);
+        ReturnStatement returnStatement = ReturnStatement.of(currentToken, null);
         nextToken();
 
         while (currentTokenIsNot(SEMICOLON)) {
@@ -85,7 +85,8 @@ class Parser {
             return null;
         }
 
-        var statement = LetStatement.of(letToken, Identifier.of(currentToken, currentToken.getLiteral()));
+        Identifier identifier = Identifier.of(currentToken, currentToken.getLiteral());
+        var statement = LetStatement.of(letToken, identifier, null);
 
         if (!expectPeekToken(ASSIGN)) {
             return null;

@@ -3,7 +3,7 @@ package nd.rw.jint.ast;
 import lombok.AllArgsConstructor;
 import nd.rw.jint.token.Token;
 
-@AllArgsConstructor
+@AllArgsConstructor(staticName = "of")
 public class ReturnStatement implements Statement {
 
     private Token token;
@@ -17,5 +17,15 @@ public class ReturnStatement implements Statement {
     @Override
     public void statementNode() {
 
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder()
+                .append(token.getLiteral())
+                .append(" ")
+                .append(returnValue != null ? returnValue.toString() : "")
+                .append(";")
+                .toString();
     }
 }

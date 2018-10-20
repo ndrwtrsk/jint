@@ -12,6 +12,8 @@ public class LetStatement implements Statement {
     @Getter
     private Identifier name;
 
+    private Expression value;
+
     @Override
     public void statementNode() {
 
@@ -20,5 +22,17 @@ public class LetStatement implements Statement {
     @Override
     public String tokenLiteral() {
         return token.getLiteral();
+    }
+
+    @Override
+    public String toString() {
+        var stringBuilder = new StringBuilder();
+        return stringBuilder.append(tokenLiteral())
+                .append(" ")
+                .append(name.toString())
+                .append(" = ")
+                .append(value != null ? value.toString() : "")
+                .append(";")
+                .toString();
     }
 }
