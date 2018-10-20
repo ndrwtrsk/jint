@@ -71,7 +71,7 @@ class Parser {
         ReturnStatement returnStatement = new ReturnStatement(currentToken, null);
         nextToken();
 
-        while (!currentTokenIs(SEMICOLON)) {
+        while (currentTokenIsNot(SEMICOLON)) {
             nextToken();
         }
 
@@ -91,7 +91,7 @@ class Parser {
             return null;
         }
 
-        while (!currentTokenIs(SEMICOLON)) {
+        while (currentTokenIsNot(SEMICOLON)) {
             nextToken();
         }
 
@@ -110,6 +110,10 @@ class Parser {
 
     private boolean peekTokenIs(TokenType tokenType) {
         return peekToken.getTokenType() == tokenType;
+    }
+
+    private boolean currentTokenIsNot(TokenType tokenType) {
+        return !currentTokenIs(tokenType);
     }
 
     private boolean currentTokenIs(TokenType tokenType) {
