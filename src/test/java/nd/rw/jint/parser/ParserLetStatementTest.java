@@ -9,7 +9,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ParserTest {
+public class ParserLetStatementTest {
 
     @Test
     public void testParsingSingleLetStatement() {
@@ -68,7 +68,7 @@ public class ParserTest {
     }
 
     @Test
-    public void testParsingYieldsErors() {
+    public void testParsingYieldsErrors() {
         //  given
         var letStatementInputWithError = "let x 5;";
         var lexer = new Lexer(letStatementInputWithError);

@@ -5,6 +5,7 @@ import lombok.Getter;
 import nd.rw.jint.ast.Identifier;
 import nd.rw.jint.ast.LetStatement;
 import nd.rw.jint.ast.Program;
+import nd.rw.jint.ast.ReturnStatement;
 import nd.rw.jint.ast.Statement;
 import nd.rw.jint.lexer.Lexer;
 import nd.rw.jint.token.Token;
@@ -57,10 +58,24 @@ class Parser {
             case LET: {
                 return parseLetStatement();
             }
+            case RETURN: {
+                return parseReturnStatement();
+            }
             default: {
                 return null;
             }
         }
+    }
+
+    private Statement parseReturnStatement() {
+        ReturnStatement returnStatement = new ReturnStatement(currentToken, null);
+        nextToken();
+
+        while (!currentTokenIs(SEMICOLON)) {
+            nextToken();
+        }
+
+        return returnStatement;
     }
 
     private LetStatement parseLetStatement() {
