@@ -1,10 +1,15 @@
 package nd.rw.jint.ast;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import nd.rw.jint.token.Token;
 
-class Identifier implements Expression {
+@AllArgsConstructor(staticName = "of")
+public class Identifier implements Expression {
 
     private Token token;
+
+    @Getter
     private String value;
 
 

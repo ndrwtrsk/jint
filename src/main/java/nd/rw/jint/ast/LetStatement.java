@@ -1,10 +1,15 @@
 package nd.rw.jint.ast;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import nd.rw.jint.token.Token;
 
-class LetStatement implements Statement {
+@AllArgsConstructor(staticName = "of")
+public class LetStatement implements Statement {
 
     private Token token;
+
+    @Getter
     private Identifier name;
 
     @Override

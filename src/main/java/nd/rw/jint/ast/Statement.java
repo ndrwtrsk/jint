@@ -1,5 +1,5 @@
 package nd.rw.jint.ast;
 
-interface Statement extends Node {
+public interface Statement extends Node {
     void statementNode();
 }
