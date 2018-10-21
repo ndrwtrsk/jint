@@ -75,12 +75,11 @@ public class ParserLetStatementTest {
         var parser = new Parser(lexer);
 
         //  when
-        var program = parser.parseProgram();
+        parser.parseProgram();
 
         //  then
         var errors = parser.getErrors();
         assertThat(errors).hasSize(1);
-        System.out.println(errors);
     }
 
 }
