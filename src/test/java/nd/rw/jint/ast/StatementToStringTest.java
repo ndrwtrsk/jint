@@ -37,4 +37,19 @@ public class StatementToStringTest {
         assertThat(toString).isEqualTo("return x;");
     }
 
+    @Test
+    public void testPrefixExpressionToString() {
+        // given
+        var token = Token.of(TokenType.BANG, "!");
+        var identifier = Identifier.of(Token.of(TokenType.IDENT, "x"), "x");
+        var prefixExpression = PrefixExpression.of(token, token.getLiteral(), identifier);
+
+        //  when
+        var toString = prefixExpression.toString();
+
+        //  then
+        assertThat(toString).isEqualTo("(!x)");
+    }
+
+
 }

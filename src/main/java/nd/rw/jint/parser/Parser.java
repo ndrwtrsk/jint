@@ -8,6 +8,7 @@ import nd.rw.jint.ast.ExpressionStatement;
 import nd.rw.jint.ast.Identifier;
 import nd.rw.jint.ast.IntegerLiteralExpression;
 import nd.rw.jint.ast.LetStatement;
+import nd.rw.jint.ast.PrefixExpression;
 import nd.rw.jint.ast.Program;
 import nd.rw.jint.ast.ReturnStatement;
 import nd.rw.jint.ast.Statement;
@@ -19,10 +20,13 @@ import java.util.List;
 import java.util.Map;
 
 import static nd.rw.jint.parser.PrecedenceOperator.LOWEST;
+import static nd.rw.jint.parser.PrecedenceOperator.PREFIX;
 import static nd.rw.jint.token.TokenType.ASSIGN;
+import static nd.rw.jint.token.TokenType.BANG;
 import static nd.rw.jint.token.TokenType.EOF;
 import static nd.rw.jint.token.TokenType.IDENT;
 import static nd.rw.jint.token.TokenType.INT;
+import static nd.rw.jint.token.TokenType.MINUS;
 import static nd.rw.jint.token.TokenType.SEMICOLON;
 
 class Parser {
@@ -44,6 +48,8 @@ class Parser {
         nextToken();
         registerPrefixParseFunction(IDENT, () -> Identifier.of(currentToken, currentToken.getLiteral()));
         registerPrefixParseFunction(INT, this::parseIntegerLiteralExpression);
+        registerPrefixParseFunction(BANG, this::parsePrefixExpression);
+        registerPrefixParseFunction(MINUS, this::parsePrefixExpression);
     }
 
     private void nextToken() {
@@ -95,12 +101,20 @@ class Parser {
         var prefixParseFunction = prefixParseFunctions.get(currentToken.getTokenType());
 
         if (prefixParseFunction == null) {
+            noPrefixParseFunctionError(currentToken.getTokenType());
             return null;
         }
 
         var leftExpression = prefixParseFunction.get();
 
         return leftExpression;
+    }
+
+    private PrefixExpression parsePrefixExpression() {
+        var token = currentToken;
+        nextToken();
+        var expression = parseExpression(PREFIX);
+        return PrefixExpression.of(token, token.getLiteral(), expression);
     }
 
     private IntegerLiteralExpression parseIntegerLiteralExpression() {
@@ -179,6 +193,11 @@ class Parser {
 
     private void registerInfixParseFunction(TokenType tokenType, InfixParseFunction fn) {
         infixParseFunctions.put(tokenType, fn);
+    }
+
+    private void noPrefixParseFunctionError(TokenType tokenType) {
+        var message = String.format("No prefix parse function found for %s", tokenType);
+        errors.add(message);
     }
 
     boolean hasErrors() {
