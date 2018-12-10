@@ -16,4 +16,8 @@ enum PrecedenceOperator {
 
     int precedence;
 
+    public boolean isLowerThan(PrecedenceOperator precedenceOperator) {
+        return this.precedence < precedenceOperator.precedence;
+    }
+
 }

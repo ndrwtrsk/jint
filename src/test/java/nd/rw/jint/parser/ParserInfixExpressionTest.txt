@@ -1,0 +1,42 @@
+//package nd.rw.jint.parser
+//
+//import nd.rw.jint.ast.ExpressionStatement
+//import nd.rw.jint.ast.InfixExpression
+//import nd.rw.jint.lexer.Lexer
+//import spock.lang.Specification
+//import spock.lang.Unroll
+//
+//class ParserInfixExpressionTest extends Specification {
+//
+//    @Unroll
+//    def "given #input expect that #left, #operator and #right is correct"() {
+//        when:
+//        def lexer = new Lexer(input)
+//        def parser = new Parser(lexer)
+//        def program = parser.parseProgram()
+//
+//        then:
+//        if(parser.hasErrors()) {
+//            println parser.errors
+//        }
+//        !parser.hasErrors()
+//        program != null
+//        program.statements.size() == 1
+//        program.statements[0] instanceof ExpressionStatement
+//        def statement = (ExpressionStatement) program.statements[0]
+//        statement.expression instanceof InfixExpression
+//        def expression = (InfixExpression) statement.expression
+//
+//        Integer.getInteger(expression.left.tokenLiteral()) == left
+//        expression.operator == operator
+//        Integer.getInteger(expression.right.tokenLiteral()) == right
+//
+//        where:
+//        input   | left | operator | right
+//        "5 + 5" | 5    | "+"      | 5
+//        "5 - 5" | 5    | "-"      | 5
+//        "5 * 5" | 5    | "*"      | 5
+//        "5 / 5" | 5    | "/"      | 5
+//    }
+//
+//}

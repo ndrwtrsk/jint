@@ -6,6 +6,7 @@ import lombok.Getter;
 import nd.rw.jint.ast.Expression;
 import nd.rw.jint.ast.ExpressionStatement;
 import nd.rw.jint.ast.Identifier;
+import nd.rw.jint.ast.InfixExpression;
 import nd.rw.jint.ast.IntegerLiteralExpression;
 import nd.rw.jint.ast.LetStatement;
 import nd.rw.jint.ast.PrefixExpression;
@@ -22,14 +23,34 @@ import java.util.Map;
 import static nd.rw.jint.parser.PrecedenceOperator.LOWEST;
 import static nd.rw.jint.parser.PrecedenceOperator.PREFIX;
 import static nd.rw.jint.token.TokenType.ASSIGN;
+import static nd.rw.jint.token.TokenType.ASTERISK;
 import static nd.rw.jint.token.TokenType.BANG;
 import static nd.rw.jint.token.TokenType.EOF;
+import static nd.rw.jint.token.TokenType.EQ;
+import static nd.rw.jint.token.TokenType.GT;
 import static nd.rw.jint.token.TokenType.IDENT;
 import static nd.rw.jint.token.TokenType.INT;
+import static nd.rw.jint.token.TokenType.LT;
 import static nd.rw.jint.token.TokenType.MINUS;
+import static nd.rw.jint.token.TokenType.NOT_EQ;
+import static nd.rw.jint.token.TokenType.PLUS;
 import static nd.rw.jint.token.TokenType.SEMICOLON;
+import static nd.rw.jint.token.TokenType.SLASH;
 
 class Parser {
+
+    private static Map<TokenType, PrecedenceOperator> PRECEDENCE_TABLE = Maps.newHashMap();
+
+    static {
+        PRECEDENCE_TABLE.put(EQ, PrecedenceOperator.EQUALS);
+        PRECEDENCE_TABLE.put(NOT_EQ, PrecedenceOperator.EQUALS);
+        PRECEDENCE_TABLE.put(LT, PrecedenceOperator.LESS_GREATER);
+        PRECEDENCE_TABLE.put(GT, PrecedenceOperator.LESS_GREATER);
+        PRECEDENCE_TABLE.put(PLUS, PrecedenceOperator.SUM);
+        PRECEDENCE_TABLE.put(MINUS, PrecedenceOperator.SUM);
+        PRECEDENCE_TABLE.put(ASTERISK, PrecedenceOperator.PRODUCT);
+        PRECEDENCE_TABLE.put(SLASH, PrecedenceOperator.PRODUCT);
+    }
 
     private Lexer lexer;
 
@@ -50,6 +71,14 @@ class Parser {
         registerPrefixParseFunction(INT, this::parseIntegerLiteralExpression);
         registerPrefixParseFunction(BANG, this::parsePrefixExpression);
         registerPrefixParseFunction(MINUS, this::parsePrefixExpression);
+        registerInfixParseFunction(PLUS, this.parseInfixExpression());
+        registerInfixParseFunction(MINUS, this.parseInfixExpression());
+        registerInfixParseFunction(ASTERISK, this.parseInfixExpression());
+        registerInfixParseFunction(SLASH, this.parseInfixExpression());
+        registerInfixParseFunction(EQ, this.parseInfixExpression());
+        registerInfixParseFunction(NOT_EQ, this.parseInfixExpression());
+        registerInfixParseFunction(LT, this.parseInfixExpression());
+        registerInfixParseFunction(GT, this.parseInfixExpression());
     }
 
     private void nextToken() {
@@ -107,6 +136,15 @@ class Parser {
 
         var leftExpression = prefixParseFunction.get();
 
+        while (!peekTokenIs(SEMICOLON) && precedenceOperator.isLowerThan(peekPrecedence())) {
+            var infixParseFunction = infixParseFunctions.get(peekToken.getTokenType());
+            if (infixParseFunction == null) {
+                return null;
+            }
+            nextToken();
+            leftExpression = infixParseFunction.apply(leftExpression);
+        }
+
         return leftExpression;
     }
 
@@ -115,6 +153,16 @@ class Parser {
         nextToken();
         var expression = parseExpression(PREFIX);
         return PrefixExpression.of(token, token.getLiteral(), expression);
+    }
+
+    private InfixParseFunction parseInfixExpression() {
+        return left -> {
+            var currentToken = this.currentToken;
+            var precedence = currentPrecedence();
+            nextToken();
+            var right = parseExpression(precedence);
+            return InfixExpression.of(currentToken, left, currentToken.getLiteral(), right);
+        };
     }
 
     private IntegerLiteralExpression parseIntegerLiteralExpression() {
@@ -202,5 +250,13 @@ class Parser {
 
     boolean hasErrors() {
         return !errors.isEmpty();
+    }
+
+    private PrecedenceOperator peekPrecedence() {
+        return PRECEDENCE_TABLE.getOrDefault(peekToken.getTokenType(), LOWEST);
+    }
+
+    private PrecedenceOperator currentPrecedence() {
+        return PRECEDENCE_TABLE.getOrDefault(currentToken.getTokenType(), LOWEST);
     }
 }
