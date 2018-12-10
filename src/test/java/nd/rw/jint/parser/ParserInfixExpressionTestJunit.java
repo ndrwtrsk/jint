@@ -2,6 +2,8 @@ package nd.rw.jint.parser;
 
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
+import nd.rw.jint.ast.ExpressionStatement;
+import nd.rw.jint.ast.InfixExpression;
 import nd.rw.jint.lexer.Lexer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,7 +20,7 @@ public class ParserInfixExpressionTestJunit {
             "5 * 5, 5, *, 5",
             "5 / 5, 5, /, 5"
     })
-    public void test(String input, int left, String operator, int right) {
+    public void test(String input, String left, String operator, String right) {
         //  when
         var lexer = new Lexer(input);
         var parser = new Parser(lexer);
@@ -31,7 +33,14 @@ public class ParserInfixExpressionTestJunit {
         assertThat(statements).hasSize(1);
 
         var statement = statements.get(0);
+        assertThat(statement).isExactlyInstanceOf(ExpressionStatement.class);
+        var expressionStatement = (ExpressionStatement) statement;
+        assertThat(expressionStatement.getExpression()).isExactlyInstanceOf(InfixExpression.class);
 
+        var infixExpression = (InfixExpression) expressionStatement.getExpression();
 
+        assertThat(infixExpression.getLeft().tokenLiteral()).isEqualTo(left);
+        assertThat(infixExpression.getOperator()).isEqualTo(operator);
+        assertThat(infixExpression.getRight().tokenLiteral()).isEqualTo(right);
     }
 }
